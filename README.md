@@ -49,16 +49,19 @@ dist/FederalExam.app
 
 Les PDF sources restent dans `notes/` et ne sont pas versionnes par Git.
 
-Pour regenerer la banque active de 1000 questions depuis les notes:
+Pour regenerer la banque active de 1000 questions et les cartes memoire depuis les notes:
 
 ```powershell
 python -m pip install -r requirements-build.txt
 python scripts\generate_draft_questions.py
+python scripts\generate_flashcards.py
 ```
 
 Le fichier genere est `data/generated_questions_fr.csv`. Les questions sont importees comme contenu actif; il n'y a plus de statut `a_verifier`, `brouillon` ou `valide`.
 
-Au premier lancement d'une nouvelle installation, l'application cree automatiquement la base locale et importe cette banque de 1000 questions si aucune base n'existe encore.
+Le fichier `data/generated_flashcards_fr.csv` contient les cartes memoire Anki-style issues des faits extraits des notes.
+
+Au premier lancement d'une nouvelle installation, l'application cree automatiquement la base locale et importe la banque de 1000 questions et le deck de cartes memoire si aucune base n'existe encore.
 
 ## Importer Des Questions
 
@@ -68,6 +71,7 @@ Depuis la ligne de commande:
 
 ```powershell
 python scripts\import_questions.py data\sample_questions_fr.csv
+python scripts\import_flashcards.py data\generated_flashcards_fr.csv
 ```
 
 Le modele CSV se trouve dans `data/questions_template.csv`.

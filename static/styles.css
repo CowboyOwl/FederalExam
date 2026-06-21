@@ -222,6 +222,16 @@ select {
   background: var(--primary-dark);
 }
 
+.button.success {
+  background: #067647;
+  color: #fff;
+}
+
+.button.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
 .messages {
   margin-bottom: 18px;
 }
@@ -250,6 +260,35 @@ select {
   display: grid;
   gap: 10px;
   margin: 18px 0;
+}
+
+.actions,
+.grade-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flashcard-back {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 18px 0;
+  padding: 16px;
+}
+
+.filter-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.checkbox-line {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 28px;
 }
 
 .choices label {

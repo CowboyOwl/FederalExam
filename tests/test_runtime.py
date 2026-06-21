@@ -71,7 +71,9 @@ def test_seed_database_imports_generated_bank_once(tmp_path: Path):
 
     with sqlite3.connect(db_path) as connection:
         total = connection.execute("SELECT COUNT(*) FROM questions").fetchone()[0]
+        cards = connection.execute("SELECT COUNT(*) FROM flashcards").fetchone()[0]
     assert total == 1000
+    assert cards > 10000
 
 
 def test_category_stats_route_renders(tmp_path: Path):

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Répétition espacée</p>
+    <h1>Cartes mémoire</h1>
+  </div>
+  <div class="actions">
+    <a class="button" href="{{ url_for('flashcard_browse') }}">Parcourir</a>
+    <a class="button primary" href="{{ url_for('flashcard_review') }}">Réviser</a>
+  </div>
+</header>
+
+<section class="metric-grid">
+  <article class="metric"><span>Cartes</span><strong>{{ stats.total }}</strong></article>
+  <article class="metric"><span>À revoir</span><strong>{{ stats.due }}</strong></article>
+  <article class="metric"><span>Revues aujourd'hui</span><strong>{{ stats.reviewed_today }}</strong></article>
+  <article class="metric"><span>Matures</span><strong>{{ stats.mature }}</strong></article>
+  <article class="metric"><span>Fragiles</span><strong>{{ stats.weak }}</strong></article>
+</section>
+
+<div class="table-card">
+  <h2>Prochaines cartes dues</h2>
+  <table>
+    <thead><tr><th>Source</th><th>Carte</th><th>Échéance</th><th></th></tr></thead>
+    <tbody>
+      {% for card in due_cards %}
+        <tr>
+          <td>{{ card.source }} p.{{ card.page }}</td>
+          <td>{{ card.front }}</td>
+          <td>{{ card.due_at }}</td>
+          <td><a href="{{ url_for('flashcard_detail', card_id=card.id) }}">Détail</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">Aucune carte due actuellement.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

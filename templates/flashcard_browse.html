@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Recherche</p>
+    <h1>Parcourir les cartes</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('flashcard_review') }}">Réviser</a>
+</header>
+
+<form class="panel filter-grid" method="get">
+  <label>Catégorie
+    <select name="categorie">
+      <option value="">Toutes</option>
+      {% for category in categories %}
+        <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Source
+    <select name="source">
+      <option value="">Toutes</option>
+      {% for source in sources %}
+        <option value="{{ source }}" {% if source == selected_source %}selected{% endif %}>{{ source }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Texte
+    <input name="q" value="{{ query }}">
+  </label>
+  <label class="checkbox-line">
+    <input type="checkbox" name="due" value="1" {% if due_only %}checked{% endif %}>
+    Dues seulement
+  </label>
+  <button class="button primary" type="submit">Filtrer</button>
+</form>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Source</th><th>Carte</th><th>Échéance</th><th>Intervalle</th></tr></thead>
+    <tbody>
+      {% for card in cards %}
+        <tr>
+          <td>{{ card.source }} p.{{ card.page }}</td>
+          <td><a href="{{ url_for('flashcard_detail', card_id=card.id) }}">{{ card.front }}</a></td>
+          <td>{{ card.due_at }}</td>
+          <td>{{ card.interval_days }} j</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">Aucune carte trouvée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ card.source }} · page {{ card.page }}</p>
+    <h1>Carte mémoire</h1>
+  </div>
+  <a class="button" href="{{ url_for('flashcard_browse') }}">Parcourir</a>
+</header>
+
+<section class="question-card">
+  <p class="eyebrow">{{ card.category }} · {{ card.sub_category }}</p>
+  <h2>{{ card.front }}</h2>
+  <p>{{ card.back }}</p>
+  <p class="reference">Échéance: {{ card.due_at }} · Intervalle: {{ card.interval_days }} j · Facilité: {{ card.ease_factor|round(2) }}</p>
+</section>
+
+<div class="table-card">
+  <h2>Historique</h2>
+  <table>
+    <thead><tr><th>Date</th><th>Note</th><th>Intervalle</th><th>Facilité</th></tr></thead>
+    <tbody>
+      {% for item in history %}
+        <tr>
+          <td>{{ item.reviewed_at }}</td>
+          <td>{{ item.grade }}</td>
+          <td>{{ item.previous_interval_days }} → {{ item.new_interval_days }} j</td>
+          <td>{{ item.previous_ease_factor|round(2) }} → {{ item.new_ease_factor|round(2) }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">Aucune révision enregistrée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

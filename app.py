@@ -28,6 +28,16 @@ from federal_exam.runtime import (
     resource_path,
     seed_database_if_missing,
 )
+from federal_exam.flashcards import (
+    browse_flashcards,
+    get_due_flashcards,
+    get_flashcard,
+    get_flashcard_history,
+    get_flashcard_sources,
+    get_flashcard_stats,
+    get_next_due_flashcard,
+    record_flashcard_review,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -129,6 +139,75 @@ def create_app(
         with conn() as db:
             history = get_failed_history(db)
         return render_template("errors.html", history=history)
+
+    @app.get("/cartes")
+    def flashcards():
+        with conn() as db:
+            stats = get_flashcard_stats(db)
+            due_cards = get_due_flashcards(db, limit=8)
+        return render_template("flashcards.html", stats=stats, due_cards=due_cards)
+
+    @app.get("/cartes/reviser")
+    def flashcard_review():
+        with conn() as db:
+            card = get_next_due_flashcard(db)
+        if not card:
+            flash("Aucune carte n'est due pour le moment.", "success")
+            return redirect(url_for("flashcards"))
+        return render_template("flashcard_review.html", card=card, show_answer=False)
+
+    @app.post("/cartes/reveler")
+    def flashcard_reveal():
+        card_id = int(request.form.get("card_id", "0"))
+        with conn() as db:
+            card = get_flashcard(db, card_id)
+        if not card:
+            flash("Carte introuvable.", "warning")
+            return redirect(url_for("flashcards"))
+        return render_template("flashcard_review.html", card=card, show_answer=True)
+
+    @app.post("/cartes/noter")
+    def flashcard_grade():
+        card_id = int(request.form.get("card_id", "0"))
+        grade = request.form.get("grade", "")
+        try:
+            with conn() as db:
+                record_flashcard_review(db, card_id, grade)
+        except ValueError:
+            flash("Note de révision invalide.", "warning")
+            return redirect(url_for("flashcards"))
+        return redirect(url_for("flashcard_review"))
+
+    @app.get("/cartes/parcourir")
+    def flashcard_browse():
+        category = request.args.get("categorie") or None
+        source = request.args.get("source") or None
+        query = request.args.get("q") or None
+        due_only = request.args.get("due") == "1"
+        with conn() as db:
+            cards = browse_flashcards(
+                db, category=category, source=source, due_only=due_only, query=query
+            )
+            sources = get_flashcard_sources(db)
+        return render_template(
+            "flashcard_browse.html",
+            cards=cards,
+            sources=sources,
+            selected_category=category,
+            selected_source=source,
+            query=query or "",
+            due_only=due_only,
+        )
+
+    @app.get("/cartes/<int:card_id>")
+    def flashcard_detail(card_id: int):
+        with conn() as db:
+            card = get_flashcard(db, card_id)
+            history = get_flashcard_history(db, card_id)
+        if not card:
+            flash("Carte introuvable.", "warning")
+            return redirect(url_for("flashcards"))
+        return render_template("flashcard_detail.html", card=card, history=history)
 
     @app.route("/importation", methods=["GET", "POST"])
     def importation():

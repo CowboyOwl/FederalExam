@@ -62,10 +62,47 @@ def init_db(path: Path | str = DATABASE_PATH) -> None:
                 last_reviewed_at TEXT
             );
 
+            CREATE TABLE IF NOT EXISTS flashcards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                external_id TEXT NOT NULL UNIQUE,
+                front TEXT NOT NULL,
+                back TEXT NOT NULL,
+                category TEXT NOT NULL,
+                sub_category TEXT NOT NULL,
+                source TEXT NOT NULL,
+                page INTEGER NOT NULL,
+                tags TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS flashcard_reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                flashcard_id INTEGER NOT NULL REFERENCES flashcards(id) ON DELETE CASCADE,
+                grade TEXT NOT NULL CHECK(grade IN ('again','hard','good','easy')),
+                previous_interval_days INTEGER NOT NULL,
+                new_interval_days INTEGER NOT NULL,
+                previous_ease_factor REAL NOT NULL,
+                new_ease_factor REAL NOT NULL,
+                reviewed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS flashcard_review_state (
+                flashcard_id INTEGER PRIMARY KEY REFERENCES flashcards(id) ON DELETE CASCADE,
+                repetitions INTEGER NOT NULL DEFAULT 0,
+                interval_days INTEGER NOT NULL DEFAULT 0,
+                ease_factor REAL NOT NULL DEFAULT 2.5,
+                due_at TEXT NOT NULL DEFAULT CURRENT_DATE,
+                last_reviewed_at TEXT
+            );
+
             CREATE INDEX IF NOT EXISTS idx_questions_category ON questions(category);
             CREATE INDEX IF NOT EXISTS idx_questions_difficulty ON questions(difficulty);
             CREATE INDEX IF NOT EXISTS idx_attempts_question ON attempts(question_id);
             CREATE INDEX IF NOT EXISTS idx_review_due ON review_state(due_at);
+            CREATE INDEX IF NOT EXISTS idx_flashcards_category ON flashcards(category);
+            CREATE INDEX IF NOT EXISTS idx_flashcards_source ON flashcards(source);
+            CREATE INDEX IF NOT EXISTS idx_flashcard_due ON flashcard_review_state(due_at);
             """
         )
 

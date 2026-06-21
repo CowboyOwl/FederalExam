@@ -9,6 +9,7 @@ datas = [
     ("templates", "templates"),
     ("static", "static"),
     ("data/generated_questions_fr.csv", "data"),
+    ("data/generated_flashcards_fr.csv", "data"),
     ("data/questions_template.csv", "data"),
     ("data/sample_questions_fr.csv", "data"),
 ]

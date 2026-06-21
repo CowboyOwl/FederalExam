@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ card.source }} · page {{ card.page }}</p>
+    <h1>Révision</h1>
+  </div>
+  <a class="button" href="{{ url_for('flashcards') }}">Quitter</a>
+</header>
+
+<article class="question-card flashcard">
+  <p class="eyebrow">{{ card.category }} · {{ card.sub_category }}</p>
+  <h2>{{ card.front }}</h2>
+  {% if show_answer %}
+    <div class="flashcard-back">
+      <p>{{ card.back }}</p>
+    </div>
+    <form class="grade-row" method="post" action="{{ url_for('flashcard_grade') }}">
+      <input type="hidden" name="card_id" value="{{ card.id }}">
+      <button class="button danger" name="grade" value="again" type="submit">À revoir</button>
+      <button class="button" name="grade" value="hard" type="submit">Difficile</button>
+      <button class="button primary" name="grade" value="good" type="submit">Bien</button>
+      <button class="button success" name="grade" value="easy" type="submit">Facile</button>
+    </form>
+  {% else %}
+    <form method="post" action="{{ url_for('flashcard_reveal') }}">
+      <input type="hidden" name="card_id" value="{{ card.id }}">
+      <button class="button primary" type="submit">Afficher la réponse</button>
+    </form>
+  {% endif %}
+</article>
+{% endblock %}

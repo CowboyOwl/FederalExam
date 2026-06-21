@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from federal_exam.database import get_connection, init_db
+from federal_exam.flashcards import import_flashcards_file
 from federal_exam.importer import import_questions_file
 
 
@@ -63,4 +64,12 @@ def seed_database_if_missing(
     if report.errors:
         preview = "; ".join(report.errors[:5])
         raise RuntimeError(f"Import initial incomplet: {preview}")
+
+    flashcards_path = resource_path("data", "generated_flashcards_fr.csv")
+    if flashcards_path.exists():
+        with get_connection(db_path) as db:
+            flashcard_report = import_flashcards_file(db, flashcards_path)
+        if flashcard_report.errors:
+            preview = "; ".join(flashcard_report.errors[:5])
+            raise RuntimeError(f"Import initial des cartes incomplet: {preview}")
     return True
