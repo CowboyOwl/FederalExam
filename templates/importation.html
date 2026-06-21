@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Banque de questions</p>
+    <h1>Importation</h1>
+  </div>
+</header>
+<form class="panel" method="post" enctype="multipart/form-data">
+  <label>Fichier CSV ou JSON
+    <input type="file" name="fichier" accept=".csv,.json" required>
+  </label>
+  <button class="button primary" type="submit">Importer</button>
+  <p class="hint">Les questions avec le statut brouillon ou a_verifier sont visibles comme contenu non validé.</p>
+</form>
+
+{% if report %}
+  <section class="panel">
+    <h2>Rapport</h2>
+    <p>{{ report.inserted }} ajoutées, {{ report.updated }} mises à jour, {{ report.errors|length }} rejetées.</p>
+    {% if report.errors %}
+      <ul class="errors">
+        {% for error in report.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+{% endif %}
+{% endblock %}

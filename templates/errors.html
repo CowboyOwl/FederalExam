@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Historique</p>
+    <h1>Réponses échouées</h1>
+  </div>
+</header>
+<div class="stack">
+  {% for item in history %}
+    <article class="error-item">
+      <p class="eyebrow">{{ item.attempted_at }} · {{ item.category }} · {{ item.difficulty }}</p>
+      <h2>{{ item.prompt }}</h2>
+      <p>Votre réponse: <strong>{{ item.selected_answer }}</strong> · Bonne réponse: <strong>{{ item.correct_answer }}</strong></p>
+      <p>{{ item.explanation }}</p>
+      <p class="reference">{{ item.reference }}</p>
+    </article>
+  {% else %}
+    <p>Aucune erreur enregistrée pour le moment.</p>
+  {% endfor %}
+</div>
+{% endblock %}

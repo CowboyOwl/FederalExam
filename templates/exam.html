@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Simulation</p>
+    <h1>Examen blanc</h1>
+  </div>
+</header>
+<form class="panel" method="post">
+  <label>Nombre de questions
+    <input type="number" name="nombre" min="10" max="200" value="50">
+  </label>
+  <label>Durée en minutes
+    <input type="number" name="minutes" min="5" max="300" value="60">
+  </label>
+  <button class="button primary" type="submit">Démarrer</button>
+</form>
+{% endblock %}

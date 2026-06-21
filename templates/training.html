@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Mode libre</p>
+    <h1>S'entraîner</h1>
+  </div>
+</header>
+<form class="panel" method="post">
+  <label>Catégorie
+    <select name="categorie">
+      <option value="">Toutes</option>
+      {% for category in categories %}
+        <option value="{{ category }}">{{ category }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Difficulté
+    <select name="difficulte">
+      <option value="">Toutes</option>
+      {% for difficulty in difficulties %}
+        <option value="{{ difficulty }}">{{ difficulty }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Nombre de questions
+    <input type="number" name="nombre" min="1" max="100" value="10">
+  </label>
+  <button class="button primary" type="submit">Lancer la série</button>
+</form>
+{% endblock %}

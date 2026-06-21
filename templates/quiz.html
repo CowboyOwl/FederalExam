@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ quiz.mode }} · Question {{ index + 1 }}/{{ total }}</p>
+    <h1>{{ question.category }}</h1>
+  </div>
+  {% if quiz.timed %}
+    <span class="timer" id="timer" data-seconds="{{ seconds_remaining }}">Temps restant</span>
+  {% endif %}
+</header>
+<form class="question-card" method="post" action="{{ url_for('answer_quiz') }}">
+  {% if question.review_status != "valide" %}
+    <p class="warning-note">Question non validée: {{ question.review_status }}</p>
+  {% endif %}
+  <h2>{{ question.prompt }}</h2>
+  <div class="choices">
+    <label><input type="radio" name="reponse" value="A" required> A. {{ question.choice_a }}</label>
+    <label><input type="radio" name="reponse" value="B"> B. {{ question.choice_b }}</label>
+    <label><input type="radio" name="reponse" value="C"> C. {{ question.choice_c }}</label>
+    <label><input type="radio" name="reponse" value="D"> D. {{ question.choice_d }}</label>
+  </div>
+  <button class="button primary" type="submit">Valider</button>
+</form>
+{% if quiz.timed %}
+  <script src="{{ url_for('static', filename='timer.js') }}"></script>
+{% endif %}
+{% endblock %}

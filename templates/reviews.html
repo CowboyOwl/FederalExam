@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Mémoire active</p>
+    <h1>Révisions espacées</h1>
+  </div>
+  <form method="post" action="{{ url_for('start_reviews') }}">
+    <button class="button primary" type="submit">Réviser maintenant</button>
+  </form>
+</header>
+<div class="table-card">
+  <table>
+    <thead><tr><th>Catégorie</th><th>Question</th><th>Répétitions</th><th>Échéance</th></tr></thead>
+    <tbody>
+      {% for question in questions %}
+        <tr>
+          <td>{{ question.category }}</td>
+          <td>{{ question.prompt }}</td>
+          <td>{{ question.repetitions }}</td>
+          <td>{{ question.due_at }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">Aucune question due.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

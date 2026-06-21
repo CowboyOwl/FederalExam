@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Progression</p>
+    <h1>Statistiques</h1>
+  </div>
+</header>
+<section class="metric-grid">
+  <article class="metric"><span>Réussite globale</span><strong>{{ stats.accuracy }}%</strong></article>
+  <article class="metric"><span>Erreurs</span><strong>{{ stats.failed }}</strong></article>
+  <article class="metric"><span>Révisions dues</span><strong>{{ stats.due_reviews }}</strong></article>
+</section>
+<section class="two-column">
+  <div class="table-card">
+    <h2>Par catégorie</h2>
+    <table>
+      <thead><tr><th>Catégorie</th><th>Réponses</th><th>Réussite</th></tr></thead>
+      <tbody>
+        {% for item in by_category %}
+          <tr><td>{{ item.name }}</td><td>{{ item.attempts }}</td><td>{{ item.accuracy }}%</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="table-card">
+    <h2>Par difficulté</h2>
+    <table>
+      <thead><tr><th>Difficulté</th><th>Réponses</th><th>Réussite</th></tr></thead>
+      <tbody>
+        {% for item in by_difficulty %}
+          <tr><td>{{ item.name }}</td><td>{{ item.attempts }}</td><td>{{ item.accuracy }}%</td></tr>
+        {% else %}
+          <tr><td colspan="3">Aucune donnée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

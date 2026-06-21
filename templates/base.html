@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or "FederalExam" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('dashboard') }}">FederalExam</a>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Tableau de bord</a>
+        <a href="{{ url_for('training') }}">S'entraîner</a>
+        <a href="{{ url_for('exam') }}">Examen blanc</a>
+        <a href="{{ url_for('reviews') }}">Révisions</a>
+        <a href="{{ url_for('errors') }}">Erreurs</a>
+        <a href="{{ url_for('statistics') }}">Statistiques</a>
+        <a href="{{ url_for('importation') }}">Importation</a>
+      </nav>
+    </aside>
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages">
+            {% for category, message in messages %}
+              <p class="message {{ category }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

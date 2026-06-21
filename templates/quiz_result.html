@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">{{ mode }}</p>
+    <h1>Résultat</h1>
+  </div>
+  <a class="button" href="{{ url_for('dashboard') }}">Retour</a>
+</header>
+<section class="metric-grid">
+  <article class="metric"><span>Score</span><strong>{{ correct }}/{{ total }}</strong></article>
+  <article class="metric"><span>Réussite</span><strong>{{ (correct / total * 100)|round(1) if total else 0 }}%</strong></article>
+</section>
+{% if missed %}
+  <section class="stack">
+    <h2>À revoir</h2>
+    {% for question in missed %}
+      <article class="error-item">
+        <p class="eyebrow">{{ question.category }} · {{ question.difficulty }}</p>
+        <h3>{{ question.prompt }}</h3>
+        <p>Bonne réponse: <strong>{{ question.correct_answer }}</strong></p>
+        <p>{{ question.explanation }}</p>
+      </article>
+    {% endfor %}
+  </section>
+{% endif %}
+{% endblock %}
