@@ -1,0 +1,44 @@
+name: Build Packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  windows:
+    name: Windows executable
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: powershell -ExecutionPolicy Bypass -File scripts\build_windows.ps1
+      - name: Zip package
+        run: Compress-Archive -Path dist\FederalExam -DestinationPath FederalExam-Windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FederalExam-Windows
+          path: FederalExam-Windows.zip
+
+  macos:
+    name: macOS app
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          chmod +x scripts/build_macos.sh
+          ./scripts/build_macos.sh
+      - name: Zip package
+        run: ditto -c -k --sequesterRsrc --keepParent dist/FederalExam.app FederalExam-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FederalExam-macOS
+          path: FederalExam-macOS.zip
