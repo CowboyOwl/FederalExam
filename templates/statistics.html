@@ -11,6 +11,19 @@
   <article class="metric"><span>Erreurs</span><strong>{{ stats.failed }}</strong></article>
   <article class="metric"><span>Révisions dues</span><strong>{{ stats.due_reviews }}</strong></article>
 </section>
+<section class="panel">
+  <h2>Évolution globale</h2>
+  <div class="chart-grid">
+    <div>
+      <h3>Réponses par jour</h3>
+      <div class="chart" data-chart="attempts" data-series='{{ timeline|tojson }}'></div>
+    </div>
+    <div>
+      <h3>Réussite par jour</h3>
+      <div class="chart" data-chart="accuracy" data-series='{{ timeline|tojson }}'></div>
+    </div>
+  </div>
+</section>
 <section class="two-column">
   <div class="table-card">
     <h2>Par catégorie</h2>
@@ -18,7 +31,11 @@
       <thead><tr><th>Catégorie</th><th>Réponses</th><th>Réussite</th></tr></thead>
       <tbody>
         {% for item in by_category %}
-          <tr><td>{{ item.name }}</td><td>{{ item.attempts }}</td><td>{{ item.accuracy }}%</td></tr>
+          <tr>
+            <td><a href="{{ url_for('category_statistics', category=item.name) }}">{{ item.name }}</a></td>
+            <td>{{ item.attempts }}</td>
+            <td>{{ item.accuracy }}%</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -37,4 +54,5 @@
     </table>
   </div>
 </section>
+<script src="{{ url_for('static', filename='charts.js') }}"></script>
 {% endblock %}

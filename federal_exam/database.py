@@ -38,7 +38,7 @@ def init_db(path: Path | str = DATABASE_PATH) -> None:
                 correct_answer TEXT NOT NULL CHECK(correct_answer IN ('A','B','C','D')),
                 explanation TEXT NOT NULL,
                 reference TEXT NOT NULL,
-                review_status TEXT NOT NULL,
+                review_status TEXT NOT NULL DEFAULT 'active',
                 tags TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -111,7 +111,7 @@ def upsert_question(db: sqlite3.Connection, row: dict) -> str:
             row["bonne_reponse"],
             row["explication"],
             row["reference"],
-            row["statut_revision"],
+            "active",
             row["tags"],
         ),
     )
@@ -153,17 +153,25 @@ def get_questions_for_quiz(
     ).fetchall()
 
 
-def get_due_reviews(db: sqlite3.Connection, limit: int = 50) -> list[sqlite3.Row]:
+def get_due_reviews(
+    db: sqlite3.Connection, limit: int = 50, category: str | None = None
+) -> list[sqlite3.Row]:
+    filters = ["rs.due_at <= CURRENT_DATE"]
+    params: list[str | int] = []
+    if category:
+        filters.append("q.category = ?")
+        params.append(category)
+    params.append(limit)
     return db.execute(
-        """
+        f"""
         SELECT q.*, rs.repetitions, rs.interval_days, rs.ease_factor, rs.due_at
         FROM review_state rs
         JOIN questions q ON q.id = rs.question_id
-        WHERE rs.due_at <= CURRENT_DATE
+        WHERE {" AND ".join(filters)}
         ORDER BY rs.due_at ASC, q.category ASC
         LIMIT ?
         """,
-        (limit,),
+        params,
     ).fetchall()
 
 
@@ -215,9 +223,20 @@ def record_attempt(
     )
 
 
-def get_failed_history(db: sqlite3.Connection) -> list[sqlite3.Row]:
+def get_failed_history(
+    db: sqlite3.Connection, category: str | None = None, limit: int | None = None
+) -> list[sqlite3.Row]:
+    filters = ["a.is_correct = 0"]
+    params: list[str | int] = []
+    if category:
+        filters.append("q.category = ?")
+        params.append(category)
+    limit_clause = ""
+    if limit is not None:
+        limit_clause = "LIMIT ?"
+        params.append(limit)
     return db.execute(
-        """
+        f"""
         SELECT
             a.attempted_at,
             a.selected_answer,
@@ -230,9 +249,12 @@ def get_failed_history(db: sqlite3.Connection) -> list[sqlite3.Row]:
             q.reference
         FROM attempts a
         JOIN questions q ON q.id = a.question_id
-        WHERE a.is_correct = 0
+        WHERE {" AND ".join(filters)}
         ORDER BY a.attempted_at DESC
+        {limit_clause}
         """
+        ,
+        params,
     ).fetchall()
 
 
@@ -287,6 +309,61 @@ def get_stats_by_category(
                 {"name": category, "attempts": 0, "correct": 0, "accuracy": 0},
             )
     return sorted(mapped.values(), key=lambda item: (item["accuracy"], -item["attempts"]))
+
+
+def get_category_stats(db: sqlite3.Connection, category: str) -> dict:
+    row = db.execute(
+        """
+        SELECT
+            q.category,
+            COUNT(a.id) AS attempts,
+            COALESCE(SUM(a.is_correct), 0) AS correct
+        FROM questions q
+        LEFT JOIN attempts a ON a.question_id = q.id
+        WHERE q.category = ?
+        GROUP BY q.category
+        """,
+        (category,),
+    ).fetchone()
+    if not row:
+        return {"name": category, "attempts": 0, "correct": 0, "accuracy": 0}
+    return _stats_row(row)
+
+
+def get_attempt_timeseries(
+    db: sqlite3.Connection, category: str | None = None
+) -> list[dict]:
+    filters = []
+    params: list[str] = []
+    if category:
+        filters.append("q.category = ?")
+        params.append(category)
+    where = f"WHERE {' AND '.join(filters)}" if filters else ""
+    rows = db.execute(
+        f"""
+        SELECT
+            date(a.attempted_at) AS day,
+            COUNT(a.id) AS attempts,
+            COALESCE(SUM(a.is_correct), 0) AS correct
+        FROM attempts a
+        JOIN questions q ON q.id = a.question_id
+        {where}
+        GROUP BY date(a.attempted_at)
+        ORDER BY day ASC
+        """,
+        params,
+    ).fetchall()
+    return [
+        {
+            "date": row["day"],
+            "attempts": row["attempts"],
+            "correct": row["correct"],
+            "accuracy": round((row["correct"] / row["attempts"]) * 100, 1)
+            if row["attempts"]
+            else 0,
+        }
+        for row in rows
+    ]
 
 
 def get_stats_by_difficulty(db: sqlite3.Connection) -> list[dict]:

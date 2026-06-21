@@ -6,8 +6,10 @@ from uuid import uuid4
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 
-from federal_exam.categories import CATEGORIES, DIFFICULTIES, REVIEW_STATUSES
+from federal_exam.categories import CATEGORIES, DIFFICULTIES
 from federal_exam.database import (
+    get_attempt_timeseries,
+    get_category_stats,
     get_connection,
     get_dashboard_stats,
     get_due_reviews,
@@ -60,7 +62,6 @@ def create_app(
         return {
             "categories": CATEGORIES,
             "difficulties": DIFFICULTIES,
-            "review_statuses": REVIEW_STATUSES,
         }
 
     @app.get("/")
@@ -156,12 +157,33 @@ def create_app(
         with conn() as db:
             by_category = get_stats_by_category(db, include_empty=True)
             by_difficulty = get_stats_by_difficulty(db)
+            timeline = get_attempt_timeseries(db)
             stats = get_dashboard_stats(db)
         return render_template(
             "statistics.html",
             by_category=by_category,
             by_difficulty=by_difficulty,
+            timeline=timeline,
             stats=stats,
+        )
+
+    @app.get("/statistiques/categorie/<path:category>")
+    def category_statistics(category: str):
+        if category not in CATEGORIES:
+            flash("Catégorie inconnue.", "warning")
+            return redirect(url_for("statistics"))
+        with conn() as db:
+            stats = get_category_stats(db, category)
+            timeline = get_attempt_timeseries(db, category=category)
+            failures = get_failed_history(db, category=category, limit=10)
+            due_reviews = get_due_reviews(db, category=category, limit=10)
+        return render_template(
+            "category_statistics.html",
+            category=category,
+            stats=stats,
+            timeline=timeline,
+            failures=failures,
+            due_reviews=due_reviews,
         )
 
     @app.get("/quiz")

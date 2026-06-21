@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from federal_exam.categories import ANSWER_KEYS, CATEGORIES, DIFFICULTIES, REVIEW_STATUSES
+from federal_exam.categories import ANSWER_KEYS, CATEGORIES, DIFFICULTIES
 from federal_exam.database import upsert_question
 
 
@@ -23,7 +23,6 @@ REQUIRED_FIELDS = [
     "bonne_reponse",
     "explication",
     "reference",
-    "statut_revision",
     "tags",
 ]
 
@@ -73,8 +72,6 @@ def validate_question_row(row: dict) -> list[str]:
         errors.append("difficulté invalide")
     if row.get("bonne_reponse") and row["bonne_reponse"] not in ANSWER_KEYS:
         errors.append("bonne_reponse doit valoir A, B, C ou D")
-    if row.get("statut_revision") and row["statut_revision"] not in REVIEW_STATUSES:
-        errors.append("statut_revision invalide")
     return errors
 
 
@@ -101,5 +98,4 @@ def _normalize_row(row: dict) -> dict:
         normalized[field] = str(value).strip() if value is not None else ""
     normalized["bonne_reponse"] = normalized["bonne_reponse"].upper()
     normalized["difficulte"] = normalized["difficulte"].lower()
-    normalized["statut_revision"] = normalized["statut_revision"].lower()
     return normalized

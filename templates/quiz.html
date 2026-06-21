@@ -10,9 +10,6 @@
   {% endif %}
 </header>
 <form class="question-card" method="post" action="{{ url_for('answer_quiz') }}">
-  {% if question.review_status != "valide" %}
-    <p class="warning-note">Question non validée: {{ question.review_status }}</p>
-  {% endif %}
   <h2>{{ question.prompt }}</h2>
   <div class="choices">
     <label><input type="radio" name="reponse" value="A" required> A. {{ question.choice_a }}</label>

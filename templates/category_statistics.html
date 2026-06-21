@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Statistiques par catégorie</p>
+    <h1>{{ category }}</h1>
+  </div>
+  <a class="button" href="{{ url_for('statistics') }}">Retour</a>
+</header>
+
+<section class="metric-grid">
+  <article class="metric"><span>Réponses</span><strong>{{ stats.attempts }}</strong></article>
+  <article class="metric"><span>Réussite</span><strong>{{ stats.accuracy }}%</strong></article>
+  <article class="metric"><span>Correctes</span><strong>{{ stats.correct }}</strong></article>
+</section>
+
+<section class="panel">
+  <h2>Évolution</h2>
+  <div class="chart-grid">
+    <div>
+      <h3>Réponses par jour</h3>
+      <div class="chart" data-chart="attempts" data-series='{{ timeline|tojson }}'></div>
+    </div>
+    <div>
+      <h3>Réussite par jour</h3>
+      <div class="chart" data-chart="accuracy" data-series='{{ timeline|tojson }}'></div>
+    </div>
+  </div>
+</section>
+
+<section class="two-column">
+  <div class="table-card">
+    <h2>Erreurs récentes</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Question</th><th>Réponse</th></tr></thead>
+      <tbody>
+        {% for item in failures %}
+          <tr>
+            <td>{{ item.attempted_at }}</td>
+            <td>{{ item.prompt }}</td>
+            <td>{{ item.selected_answer }} → {{ item.correct_answer }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3">Aucune erreur enregistrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="table-card">
+    <h2>Révisions dues</h2>
+    <table>
+      <thead><tr><th>Échéance</th><th>Question</th><th>Répétitions</th></tr></thead>
+      <tbody>
+        {% for question in due_reviews %}
+          <tr>
+            <td>{{ question.due_at }}</td>
+            <td>{{ question.prompt }}</td>
+            <td>{{ question.repetitions }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3">Aucune révision due.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='charts.js') }}"></script>
+{% endblock %}

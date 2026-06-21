@@ -123,6 +123,50 @@ p {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.chart-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.chart {
+  min-height: 220px;
+}
+
+.chart svg {
+  height: auto;
+  max-width: 100%;
+  overflow: visible;
+  width: 100%;
+}
+
+.chart line {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.chart polyline {
+  fill: none;
+  stroke: var(--primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.chart circle {
+  fill: var(--primary);
+}
+
+.empty-chart {
+  align-items: center;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  display: flex;
+  min-height: 180px;
+  padding: 16px;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
@@ -245,6 +289,7 @@ select {
   }
 
   .two-column,
+  .chart-grid,
   .page-header {
     grid-template-columns: 1fr;
   }

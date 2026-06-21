@@ -12,5 +12,4 @@ CATEGORIES = [
 ]
 
 DIFFICULTIES = ["facile", "moyen", "difficile"]
-REVIEW_STATUSES = ["brouillon", "a_verifier", "valide"]
 ANSWER_KEYS = ["A", "B", "C", "D"]
