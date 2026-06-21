@@ -36,6 +36,7 @@ from federal_exam.flashcards import (
     get_flashcard_sources,
     get_flashcard_stats,
     get_next_due_flashcard,
+    import_flashcards_file,
     record_flashcard_review,
 )
 
@@ -146,6 +147,22 @@ def create_app(
             stats = get_flashcard_stats(db)
             due_cards = get_due_flashcards(db, limit=8)
         return render_template("flashcards.html", stats=stats, due_cards=due_cards)
+
+    @app.post("/cartes/importer-integrees")
+    def import_bundled_flashcards():
+        path = resource_path("data", "generated_flashcards_fr.csv")
+        if not path.exists():
+            flash("Le fichier de cartes intégré est introuvable.", "warning")
+            return redirect(url_for("flashcards"))
+        with conn() as db:
+            report = import_flashcards_file(db, path)
+        flash(
+            f"Cartes importées: {report.inserted} ajoutées, {report.updated} mises à jour.",
+            "success",
+        )
+        if report.errors:
+            flash(f"{len(report.errors)} carte(s) rejetée(s).", "warning")
+        return redirect(url_for("flashcards"))
 
     @app.get("/cartes/reviser")
     def flashcard_review():

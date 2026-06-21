@@ -76,6 +76,40 @@ def test_seed_database_imports_generated_bank_once(tmp_path: Path):
     assert cards > 10000
 
 
+def test_existing_database_gets_flashcard_schema_without_auto_import(tmp_path: Path):
+    from federal_exam.database import get_connection, upsert_question
+
+    db_path = tmp_path / "old.db"
+    create_app(database_path=db_path, upload_dir=tmp_path / "uploads")
+    with get_connection(db_path) as db:
+        upsert_question(db, QUESTION)
+    with sqlite3.connect(db_path) as connection:
+        connection.execute("DROP TABLE flashcard_reviews")
+        connection.execute("DROP TABLE flashcard_review_state")
+        connection.execute("DROP TABLE flashcards")
+
+    assert seed_database_if_missing(db_path, Path("data") / "generated_questions_fr.csv") is False
+    with sqlite3.connect(db_path) as connection:
+        cards = connection.execute("SELECT COUNT(*) FROM flashcards").fetchone()[0]
+    assert cards == 0
+
+
+def test_existing_database_can_import_bundled_flashcards_from_ui(tmp_path: Path):
+    db_path = tmp_path / "existing.db"
+    app = create_app(database_path=db_path, upload_dir=tmp_path / "uploads")
+    client = app.test_client()
+
+    response = client.get("/cartes")
+    assert response.status_code == 200
+    assert "Importer les cartes" in response.get_data(as_text=True)
+
+    response = client.post("/cartes/importer-integrees", follow_redirects=True)
+    assert response.status_code == 200
+    with sqlite3.connect(db_path) as connection:
+        cards = connection.execute("SELECT COUNT(*) FROM flashcards").fetchone()[0]
+    assert cards > 10000
+
+
 def test_category_stats_route_renders(tmp_path: Path):
     from federal_exam.database import get_connection, upsert_question
 

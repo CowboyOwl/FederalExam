@@ -47,11 +47,13 @@ def seed_database_if_missing(
     seed_csv_path: Path | str | None = None,
 ) -> bool:
     db_path = Path(database_path) if database_path else get_database_path()
-    if db_path.exists():
-        return False
-
     db_path.parent.mkdir(parents=True, exist_ok=True)
     init_db(db_path)
+    if db_path.exists() and db_path.stat().st_size > 0:
+        with get_connection(db_path) as db:
+            existing_questions = db.execute("SELECT COUNT(*) FROM questions").fetchone()[0]
+        if existing_questions:
+            return False
 
     seed_path = Path(seed_csv_path) if seed_csv_path else resource_path(
         "data", "generated_questions_fr.csv"

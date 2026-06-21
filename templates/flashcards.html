@@ -19,6 +19,16 @@
   <article class="metric"><span>Fragiles</span><strong>{{ stats.weak }}</strong></article>
 </section>
 
+{% if stats.total == 0 %}
+  <section class="panel">
+    <h2>Importer les cartes intégrées</h2>
+    <p class="hint">Cette base existe déjà mais ne contient pas encore les cartes mémoire générées depuis les notes.</p>
+    <form method="post" action="{{ url_for('import_bundled_flashcards') }}">
+      <button class="button primary" type="submit">Importer les cartes mémoire</button>
+    </form>
+  </section>
+{% endif %}
+
 <div class="table-card">
   <h2>Prochaines cartes dues</h2>
   <table>
