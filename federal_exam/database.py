@@ -20,6 +20,7 @@ def get_connection(path: Path | str = DATABASE_PATH) -> sqlite3.Connection:
 
 
 def init_db(path: Path | str = DATABASE_PATH) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     with get_connection(path) as db:
         db.executescript(
             """

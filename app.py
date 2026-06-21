@@ -8,7 +8,6 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 
 from federal_exam.categories import CATEGORIES, DIFFICULTIES, REVIEW_STATUSES
 from federal_exam.database import (
-    DATABASE_PATH,
     get_connection,
     get_dashboard_stats,
     get_due_reviews,
@@ -21,18 +20,37 @@ from federal_exam.database import (
     record_attempt,
 )
 from federal_exam.importer import import_questions_file
+from federal_exam.runtime import (
+    get_database_path,
+    get_upload_dir,
+    resource_path,
+    seed_database_if_missing,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
-UPLOAD_DIR = BASE_DIR / "uploads"
 
 
-def create_app(database_path: Path | str = DATABASE_PATH) -> Flask:
-    app = Flask(__name__)
+def create_app(
+    database_path: Path | str | None = None,
+    upload_dir: Path | str | None = None,
+    seed_database: bool = False,
+) -> Flask:
+    db_path = Path(database_path) if database_path else get_database_path()
+    uploads_path = Path(upload_dir) if upload_dir else get_upload_dir()
+    app = Flask(
+        __name__,
+        template_folder=str(resource_path("templates")),
+        static_folder=str(resource_path("static")),
+    )
     app.secret_key = "local-dev-secret-change-if-shared"
-    app.config["DATABASE_PATH"] = str(database_path)
-    UPLOAD_DIR.mkdir(exist_ok=True)
-    init_db(database_path)
+    app.config["DATABASE_PATH"] = str(db_path)
+    app.config["UPLOAD_DIR"] = str(uploads_path)
+    uploads_path.mkdir(parents=True, exist_ok=True)
+    if seed_database:
+        seed_database_if_missing(db_path)
+    else:
+        init_db(db_path)
 
     def conn():
         return get_connection(app.config["DATABASE_PATH"])
@@ -119,7 +137,7 @@ def create_app(database_path: Path | str = DATABASE_PATH) -> Flask:
             if not upload or not upload.filename:
                 flash("Choisissez un fichier CSV ou JSON.", "warning")
                 return redirect(url_for("importation"))
-            target = UPLOAD_DIR / f"{uuid4().hex}_{Path(upload.filename).name}"
+            target = Path(app.config["UPLOAD_DIR"]) / f"{uuid4().hex}_{Path(upload.filename).name}"
             upload.save(target)
             with conn() as db:
                 report = import_questions_file(db, target)
@@ -255,8 +273,6 @@ def quiz_expired(quiz_state: dict) -> bool:
     return remaining is not None and remaining <= 0
 
 
-app = create_app()
-
-
 if __name__ == "__main__":
+    app = create_app(seed_database=True)
     app.run(host="127.0.0.1", port=5000, debug=False)

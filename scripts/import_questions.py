@@ -8,14 +8,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from federal_exam.database import DATABASE_PATH, get_connection, init_db
+from federal_exam.database import get_connection, init_db
 from federal_exam.importer import import_questions_file
+from federal_exam.runtime import get_database_path
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Importer une banque de questions.")
     parser.add_argument("file", type=Path, help="Fichier CSV ou JSON à importer")
-    parser.add_argument("--db", type=Path, default=DATABASE_PATH, help="Base SQLite cible")
+    parser.add_argument("--db", type=Path, default=get_database_path(), help="Base SQLite cible")
     args = parser.parse_args()
 
     init_db(args.db)
